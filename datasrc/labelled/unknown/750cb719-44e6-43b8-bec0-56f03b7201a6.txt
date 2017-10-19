@@ -1,0 +1,1 @@
+how many double-word-score spaces are there on a scrabble crossword game board ?

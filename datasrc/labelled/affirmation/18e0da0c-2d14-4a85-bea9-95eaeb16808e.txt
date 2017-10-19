@@ -1,0 +1,1 @@
+does this monitor read humidity levels below 16% ?

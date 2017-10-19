@@ -1,0 +1,1 @@
+can show temperature in celsius degrees ?
