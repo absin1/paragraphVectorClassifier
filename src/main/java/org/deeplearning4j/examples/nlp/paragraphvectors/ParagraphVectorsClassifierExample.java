@@ -1,7 +1,12 @@
 package org.deeplearning4j.examples.nlp.paragraphvectors;
 
-import org.datavec.api.util.ClassPathResource;
-import org.nd4j.linalg.primitives.Pair;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.List;
+
 import org.deeplearning4j.examples.nlp.paragraphvectors.tools.LabelSeeker;
 import org.deeplearning4j.examples.nlp.paragraphvectors.tools.MeansBuilder;
 import org.deeplearning4j.models.embeddings.inmemory.InMemoryLookupTable;
@@ -14,16 +19,9 @@ import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreproc
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.primitives.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.util.List;
 
 /**
  * This is basic example for documents classification done with DL4j
@@ -51,54 +49,41 @@ public class ParagraphVectorsClassifierExample {
 	public static void main(String[] args) throws Exception {
 		Long now = System.currentTimeMillis();
 		ParagraphVectorsClassifierExample app = new ParagraphVectorsClassifierExample();
-		System.out.println((System.currentTimeMillis() - now) / 1000);
 		app.makeParagraphVectors(now);
-		System.out.println((System.currentTimeMillis() - now) / 1000);
+		System.out.println("Starting unlabeled data after  -> " + (System.currentTimeMillis() - now) + " milliseconds");
 		app.checkUnlabeledData();
-		System.out.println((System.currentTimeMillis() - now) / 1000);
+		System.out.println("Exiting after  -> " + (System.currentTimeMillis() - now) + " milliseconds");
 		System.exit(0);
 		/*
 		 * Your output should be like this:
 		 * 
-		 * Document 'health' falls into the following categories: health:
-		 * 0.29721372296220205 science: 0.011684473733853906 finance:
-		 * -0.14755302887323793
-		 * 
-		 * Document 'finance' falls into the following categories: health:
-		 * -0.17290237675941766 science: -0.09579267574606627 finance:
-		 * 0.4460859189453788
+		 * Document '[ABBR_abb_60c29f33-373d-41e3-9295-d670f0156a23]>>What is the
+		 * abbreviation for micro ?' falls into the following categories: affirmation:
+		 * -0.09517832100391388 unknown: -0.30406102538108826 what: 0.5202820897102356
+		 * when: -0.12125464528799057 who: -0.1165885478258133
 		 * 
 		 * so,now we know categories for yet unseen documents
 		 */
 	}
 
 	void makeParagraphVectors(Long now) throws Exception {
-		/*
-		 * ClassPathResource resource = new ClassPathResource("paravec/labeled");
-		 * 
-		 * // build a iterator for our dataset iterator = new
-		 * FileLabelAwareIterator.Builder().addSourceFolder(resource.getFile()).build();
-		 */
-		iterator = new FileLabelAwareIterator.Builder()
-				.addSourceFolder(
-						new File("C:\\\\Users\\\\Unimax\\\\git\\\\paragraphVectorClassifier\\\\datasrc\\\\labelled"))
-				.build();
+		iterator = new FileLabelAwareIterator.Builder().addSourceFolder(new File("datasrc/labelled")).build();
 
-		System.out.println("80->" + (System.currentTimeMillis() - now) / 1000);
+		System.out.println("Training files added after ->" + (System.currentTimeMillis() - now) + "milliseconds");
 
 		tokenizerFactory = new DefaultTokenizerFactory();
 		tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
-		System.out.println("84->" + (System.currentTimeMillis() - now) / 1000);
+		System.out.println("Training files tokenized after ->" + (System.currentTimeMillis() - now) + "milliseconds");
 
 		// ParagraphVectors training configuration
 		paragraphVectors = new ParagraphVectors.Builder().learningRate(0.025).minLearningRate(0.001).batchSize(1000)
 				.epochs(20).iterate(iterator).trainWordVectors(true).tokenizerFactory(tokenizerFactory).build();
-		System.out.println("89->" + (System.currentTimeMillis() - now) / 1000);
+		System.out.println("Paragraph vectors created after ->" + (System.currentTimeMillis() - now) / 1000);
 
 		// Start model training
 		paragraphVectors.fit();
 
-		System.out.println("94->" + (System.currentTimeMillis() - now) / 1000);
+		System.out.println("Paragraph2vec trained after ->" + (System.currentTimeMillis() - now) + "milliseconds");
 
 	}
 
@@ -108,17 +93,8 @@ public class ParagraphVectorsClassifierExample {
 		 * categories our unlabeled document falls into. So we'll start loading our
 		 * unlabeled documents and checking them
 		 */
-		/*
-		 * ClassPathResource unClassifiedResource = new
-		 * ClassPathResource("paravec/unlabeled"); FileLabelAwareIterator
-		 * unClassifiedIterator = new FileLabelAwareIterator.Builder()
-		 * .addSourceFolder(unClassifiedResource.getFile()) .build();
-		 */
-
 		FileLabelAwareIterator unClassifiedIterator = new FileLabelAwareIterator.Builder()
-				.addSourceFolder(
-						new File("C:\\\\Users\\\\Unimax\\\\git\\\\paragraphVectorClassifier\\\\datasrc\\\\unlabelled"))
-				.build();
+				.addSourceFolder(new File("datasrc/unlabelled")).build();
 		/*
 		 * Now we'll iterate over unlabeled data, and check which label it could be
 		 * assigned to Please note: for many domains it's normal to have 1 document fall
@@ -141,10 +117,8 @@ public class ParagraphVectorsClassifierExample {
 			 * classification done properly
 			 */
 			String replaceAll = document.getLabels().get(0).toString().replace("[", "").replace("]", "");
-			
-			File file = new File(
-					"C:\\\\\\\\Users\\\\\\\\Unimax\\\\\\\\git\\\\\\\\paragraphVectorClassifier\\\\\\\\datasrc\\\\\\\\unlabelled\\"
-							+ replaceAll + "\\" + replaceAll + ".txt");
+
+			File file = new File("datasrc/unlabelled" + replaceAll + "/" + replaceAll + ".txt");
 			Reader in = new FileReader(file);
 			BufferedReader bufferedReader = new BufferedReader(in);
 			String question = "";
@@ -154,7 +128,6 @@ public class ParagraphVectorsClassifierExample {
 			bufferedReader.close();
 			System.out.println(
 					"Document '" + document.getLabels() + ">>" + question + "' falls into the following categories: ");
-			// [HUM_ind_c9b3b649-7eae-46c2-933e-5c0fb146b630]
 			for (Pair<String, Double> score : scores) {
 				System.out.println("        " + score.getFirst() + ": " + score.getSecond());
 			}
