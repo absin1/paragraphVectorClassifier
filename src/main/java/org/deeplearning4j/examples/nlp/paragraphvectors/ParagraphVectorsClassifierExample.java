@@ -78,7 +78,7 @@ public class ParagraphVectorsClassifierExample {
 		// ParagraphVectors training configuration
 		paragraphVectors = new ParagraphVectors.Builder().learningRate(0.025).minLearningRate(0.001).batchSize(1000)
 				.epochs(20).iterate(iterator).trainWordVectors(true).tokenizerFactory(tokenizerFactory).build();
-		System.out.println("Paragraph vectors created after ->" + (System.currentTimeMillis() - now) / 1000);
+		System.out.println("Paragraph vectors created after ->" + (System.currentTimeMillis() - now) + " milliseconds");
 
 		// Start model training
 		paragraphVectors.fit();
@@ -118,7 +118,7 @@ public class ParagraphVectorsClassifierExample {
 			 */
 			String replaceAll = document.getLabels().get(0).toString().replace("[", "").replace("]", "");
 
-			File file = new File("datasrc/unlabelled" + replaceAll + "/" + replaceAll + ".txt");
+			File file = new File("datasrc/unlabelled/" + replaceAll + "/" + replaceAll + ".txt");
 			Reader in = new FileReader(file);
 			BufferedReader bufferedReader = new BufferedReader(in);
 			String question = "";
