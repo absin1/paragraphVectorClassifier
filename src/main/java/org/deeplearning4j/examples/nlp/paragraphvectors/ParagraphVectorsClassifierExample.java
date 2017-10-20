@@ -17,8 +17,12 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.List;
 
 /**
@@ -51,6 +55,8 @@ public class ParagraphVectorsClassifierExample {
 		app.makeParagraphVectors(now);
 		System.out.println((System.currentTimeMillis() - now) / 1000);
 		app.checkUnlabeledData();
+		System.out.println((System.currentTimeMillis() - now) / 1000);
+		System.exit(0);
 		/*
 		 * Your output should be like this:
 		 * 
@@ -73,8 +79,9 @@ public class ParagraphVectorsClassifierExample {
 		 * // build a iterator for our dataset iterator = new
 		 * FileLabelAwareIterator.Builder().addSourceFolder(resource.getFile()).build();
 		 */
-		iterator = new FileLabelAwareIterator.Builder().addSourceFolder(new File(
-				"C:\\Users\\Istar\\Downloads\\dl4j-examples-master\\dl4j-examples\\src\\main\\resources\\paravec\\labeled"))
+		iterator = new FileLabelAwareIterator.Builder()
+				.addSourceFolder(
+						new File("C:\\\\Users\\\\Unimax\\\\git\\\\paragraphVectorClassifier\\\\datasrc\\\\labelled"))
 				.build();
 
 		System.out.println("80->" + (System.currentTimeMillis() - now) / 1000);
@@ -95,7 +102,7 @@ public class ParagraphVectorsClassifierExample {
 
 	}
 
-	void checkUnlabeledData() throws FileNotFoundException {
+	void checkUnlabeledData() throws IOException {
 		/*
 		 * At this point we assume that we have model built and we can check which
 		 * categories our unlabeled document falls into. So we'll start loading our
@@ -108,8 +115,9 @@ public class ParagraphVectorsClassifierExample {
 		 * .addSourceFolder(unClassifiedResource.getFile()) .build();
 		 */
 
-		FileLabelAwareIterator unClassifiedIterator = new FileLabelAwareIterator.Builder().addSourceFolder(new File(
-				"C:\\Users\\Istar\\Downloads\\dl4j-examples-master\\dl4j-examples\\src\\main\\resources\\paravec\\unlabeled"))
+		FileLabelAwareIterator unClassifiedIterator = new FileLabelAwareIterator.Builder()
+				.addSourceFolder(
+						new File("C:\\\\Users\\\\Unimax\\\\git\\\\paragraphVectorClassifier\\\\datasrc\\\\unlabelled"))
 				.build();
 		/*
 		 * Now we'll iterate over unlabeled data, and check which label it could be
@@ -132,7 +140,21 @@ public class ParagraphVectorsClassifierExample {
 			 * labels on these two documents are used like titles, just to visualize our
 			 * classification done properly
 			 */
-			System.out.println("Document '" + document.getLabels() + "' falls into the following categories: ");
+			String replaceAll = document.getLabels().get(0).toString().replace("[", "").replace("]", "");
+			
+			File file = new File(
+					"C:\\\\\\\\Users\\\\\\\\Unimax\\\\\\\\git\\\\\\\\paragraphVectorClassifier\\\\\\\\datasrc\\\\\\\\unlabelled\\"
+							+ replaceAll + "\\" + replaceAll + ".txt");
+			Reader in = new FileReader(file);
+			BufferedReader bufferedReader = new BufferedReader(in);
+			String question = "";
+			String line = "";
+			while ((line = bufferedReader.readLine()) != null)
+				question += line;
+			bufferedReader.close();
+			System.out.println(
+					"Document '" + document.getLabels() + ">>" + question + "' falls into the following categories: ");
+			// [HUM_ind_c9b3b649-7eae-46c2-933e-5c0fb146b630]
 			for (Pair<String, Double> score : scores) {
 				System.out.println("        " + score.getFirst() + ": " + score.getSecond());
 			}
